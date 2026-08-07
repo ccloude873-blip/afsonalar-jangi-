@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Afsonalar Jangi</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body { height:100%; overflow:hidden; background:#0a0a0f; font-family:'Courier New',monospace; color:#eee; }
+  #wrap { position:relative; width:100%; height:100%; max-width:480px; margin:0 auto; background:#141b2b; }
+
+  #loading { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+  #loading .spinner { width:40px; height:40px; border:4px solid #333; border-top-color:#ffb300; border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  #pickScreen { position:absolute; inset:0; display:none; flex-direction:column; padding:16px; overflow-y:auto; }
+  #pickScreen h2 { text-align:center; color:#ffb300; font-size:16px; letter-spacing:2px; margin-bottom:14px; }
+  #cardGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .cardThumb { background:#1e2740; border:2px solid #333; border-radius:8px; overflow:hidden; text-align:center; padding-bottom:4px; }
+  .cardThumb.selected { border-color:#ffb300; box-shadow:0 0 10px rgba(255,179,0,.6); }
+  .cardThumb img { width:100%; display:block; background:#0a0a0f; }
+  .cardThumb .nm { font-size:9px; padding:3px 2px; color:#ccc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #startBtn { margin-top:14px; padding:12px; background:linear-gradient(90deg,#ffb300,#ff7a00); color:#000; font-weight:bold; text-align:center; border-radius:8px; letter-spacing:1px; }
+  #startBtn.disabled { opacity:0.4; }
+
+  #battleScreen { position:absolute; inset:0; display:none; }
+  #hud { position:absolute; top:0; left:0; right:0; padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; z-index:5; }
+  .hpbox { width:42%; }
+  .hplabel { font-size:11px; color:#ddd; letter-spacing:1px; margin-bottom:3px; text-shadow:0 1px 2px #000; }
+  .hpbar { height:10px; border:2px solid #000; background:#3a1010; border-radius:3px; overflow:hidden; }
+  .hpfill { height:100%; transition:width .25s ease; }
+  #playerhp .hpfill { background:linear-gradient(90deg,#ffb300,#ff7a00); }
+  #enemyhp .hpfill { background:linear-gradient(90deg,#ff3b3b,#c40000); }
+  #enemybox { text-align:right; }
+  #score { position:absolute; top:52px; left:16px; color:#ffb300; font-size:13px; text-shadow:0 1px 2px #000; z-index:5; }
+
+  #playerImg, #enemyImg {
+    position:absolute; bottom:14%; height:52%;
+    filter: drop-shadow(0 10px 14px rgba(0,0,0,.6));
+    transition: transform .12s ease;
+  }
+  #playerImg { left:8%; }
+  #enemyImg { right:8%; transform: scaleX(-1); filter: drop-shadow(0 10px 14px rgba(0,0,0,.6)) hue-rotate(190deg) saturate(1.4); }
+
+  #banner { position:absolute; top:38%; left:0; right:0; text-align:center; pointer-events:none; opacity:0; transition:opacity .3s; z-index:6; }
+  #banner.show { opacity:1; }
+  #banner .big { font-size:26px; font-weight:bold; color:#ff3b3b; text-shadow:0 0 12px rgba(255,59,59,.8), 0 2px 4px #000; letter-spacing:2px; }
+  #banner .small { font-size:13px; color:#eee; margin-top:4px; text-shadow:0 1px 3px #000; }
+  #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:7; }
+
+  #controls { position:absolute; bottom:0; left:0; right:0; padding:18px; display:flex; justify-content:center; z-index:5; }
+  #punchBtn { width:84px; height:84px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ff5b3b, #c4291a); border:2px solid rgba(255,255,255,.35); font-size:15px; font-weight:bold; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,.5); }
+  #punchBtn:active { transform:scale(0.9); }
+
+  #bgCanvas { position:absolute; inset:0; z-index:0; }
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Kartalar yuklanmoqda...</div>
+  </div>
+
+  <div id="pickScreen">
+    <h2>⚔ JANGCHINGIZNI TANLANG</h2>
+    <div id="cardGrid"></div>
+    <div id="startBtn" class="disabled">JANGGA KIRISH</div>
+  </div>
+
+  <div id="battleScreen">
+    <canvas id="bgCanvas"></canvas>
+    <img id="playerImg">
+    <img id="enemyImg">
+    <div id="hud">
+      <div class="hpbox" id="playerhp">
+        <div class="hplabel" id="playerName">SEN</div>
+        <div class="hpbar"><div class="hpfill" style="width:100%"></div></div>
+      </div>
+      <div class="hpbox" id="enemybox">
+        <div class="hplabel">RAQIB</div>
+        <div class="hpbar" id="enemyhp"><div class="hpfill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div id="score">Ball: 0</div>
+    <div id="banner"><div class="big" id="bannerBig"></div><div class="small" id="bannerSmall"></div></div>
+    <div id="flash"></div>
+    <div id="controls"><div id="punchBtn">ZARBA</div></div>
+  </div>
+
+</div>
+
+<script>
+// ==== SOZLAMA: shu qatorni o'z tunnel havolangizga moslang ====
+const API_BASE = "https://seekers-recycling-garden-vegetables.trycloudflare.com";
+// =================================================================
+
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+// Telegram user ID (test uchun query orqali ham berish mumkin: ?uid=123)
+const params = new URLSearchParams(location.search);
+const uid = params.get('uid') || tg?.initDataUnsafe?.user?.id || "8274516387";
+
+let myCards = [];
+let selectedCard = null;
+
+async function loadCards() {
+  try {
+    const res = await fetch(`${API_BASE}/api/team/${uid}`);
+    myCards = await res.json();
+  } catch (e) {
+    myCards = [];
+  }
+  document.getElementById('loading').style.display = 'none';
+  if (myCards.length === 0) {
+    document.getElementById('pickScreen').style.display = 'flex';
+    document.getElementById('cardGrid').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#888">Kartalar topilmadi</p>';
+    return;
+  }
+  renderPickScreen();
+}
+
+function renderPickScreen() {
+  document.getElementById('pickScreen').style.display = 'flex';
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+  myCards.slice(0, 30).forEach(card => {
+    const div = document.createElement('div');
+    div.className = 'cardThumb';
+    div.innerHTML = `<img src="${API_BASE}${card.image_url}" loading="lazy"><div class="nm">${card.name}</div>`;
+    div.onclick = () => {
+      document.querySelectorAll('.cardThumb').forEach(el => el.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedCard = card;
+      document.getElementById('startBtn').classList.remove('disabled');
+    };
+    grid.appendChild(div);
+  });
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  if (!selectedCard) return;
+  startBattle(selectedCard);
+});
+
+function startBattle(card) {
+  document.getElementById('pickScreen').style.display = 'none';
+  document.getElementById('battleScreen').style.display = 'block';
+
+  const enemyPool = myCards.filter(c => c.id !== card.id);
+  const enemy = enemyPool.length ? enemyPool[Math.floor(Math.random()*enemyPool.length)] : card;
+
+  document.getElementById('playerImg').src = `${API_BASE}${card.image_url}`;
+  document.getElementById('enemyImg').src = `${API_BASE}${enemy.image_url}`;
+  document.getElementById('playerName').textContent = card.name.toUpperCase();
+
+  let playerHp = 100, enemyHp = 80, maxEnemyHp = 80, score = 0, gameOver = false, punching = false;
+
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  function resize(){ canvas.width = document.getElementById('wrap').clientWidth; canvas.height = document.getElementById('wrap').clientHeight; drawBg(); }
+  function drawBg(){
+    const gy = canvas.height*0.78;
+    const g = ctx.createLinearGradient(0,0,0,gy);
+    g.addColorStop(0,'#2a3550'); g.addColorStop(1,'#141b2b');
+    ctx.fillStyle=g; ctx.fillRect(0,0,canvas.width,gy);
+    const colors=['#3a6ea5','#c4571e','#4a4a52'];
+    for(let i=0;i<6;i++){
+      ctx.fillStyle=colors[i%colors.length];
+      ctx.fillRect(i*130-40, gy-110, 100, 80);
+      ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.strokeRect(i*130-40, gy-110, 100, 80);
+    }
+    ctx.fillStyle='#565b66'; ctx.fillRect(0,gy,canvas.width,canvas.height-gy);
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  function updateHUD(){
+    document.querySelector('#playerhp .hpfill').style.width = Math.max(0,playerHp)+'%';
+    document.querySelector('#enemyhp .hpfill').style.width = Math.max(0,(enemyHp/maxEnemyHp*100))+'%';
+  }
+  function showBanner(big,small){
+    const b=document.getElementById('banner');
+    document.getElementById('bannerBig').textContent=big;
+    document.getElementById('bannerSmall').textContent=small;
+    b.classList.add('show');
+    setTimeout(()=>b.classList.remove('show'),1000);
+  }
+  function flash(){
+    const f=document.getElementById('flash');
+    f.style.opacity=0.5; setTimeout(()=>f.style.opacity=0,90);
+  }
+  function shakeScreen(){
+    const w=document.getElementById('wrap');
+    w.style.transform='translateX(-6px)';
+    setTimeout(()=>w.style.transform='translateX(6px)',60);
+    setTimeout(()=>w.style.transform='translateX(0)',120);
+  }
+
+  document.getElementById('punchBtn').onclick = () => {
+    if (gameOver || punching) return;
+    punching = true;
+    const pImg = document.getElementById('playerImg');
+    pImg.style.transform='translateX(22px) rotate(-4deg)';
+    setTimeout(()=>{ pImg.style.transform=''; punching=false; },150);
+
+    enemyHp -= 15;
+    flash(); shakeScreen();
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+    if (enemyHp<=0){
+      score+=25;
+      document.getElementById('score').textContent='Ball: '+score;
+      showBanner("G'ALABA!","+25 ball — yangi raqib");
+      const eImg = document.getElementById('enemyImg');
+      eImg.style.opacity=0;
+      const nextEnemy = enemyPool.length ? enemyPool[Math.floor(Math.random()*enemyPool.length)] : enemy;
+      setTimeout(()=>{
+        enemyHp=maxEnemyHp=80+score;
+        eImg.src = `${API_BASE}${nextEnemy.image_url}`;
+        eImg.style.opacity=1;
+        updateHUD();
+      },700);
+    }
+    updateHUD();
+
+    if (Math.random()<0.35 && !gameOver){
+      setTimeout(()=>{
+        playerHp -= 8;
+        updateHUD(); shakeScreen();
+        if (playerHp<=0){
+          gameOver=true;
+          showBanner("MAG'LUBIYAT","Ball: "+score+" — qayta boshlash uchun bosing");
+          if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        }
+      },300);
+    }
+  };
+
+  document.getElementById('wrap').addEventListener('click', () => {
+    if (gameOver) {
+      playerHp=100; enemyHp=maxEnemyHp=80; score=0; gameOver=false;
+      document.getElementById('score').textContent='Ball: 0';
+      updateHUD();
+    }
+  });
+
+  updateHUD();
+}
+
+loadCards();
+</script>
+</body>
+</html>
