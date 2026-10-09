@@ -28,16 +28,16 @@ h1{margin:0;font-size:28px;flex:1}
 .tab i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--mut))}
 .tab[aria-pressed=true]{background:var(--c,var(--acc));border-color:var(--c,var(--acc));color:#111}
 .tab[aria-pressed=true] i{background:#111}
-.tools{display:flex;gap:8px;margin-top:10px}
-.tools input,.tools select{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tools input,.tools select{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.tools input{flex:1 1 100%}.tools select{flex:1 1 0}
 .cols{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.cols button{background:var(--panel);border:0;padding:0 11px;cursor:pointer;font-weight:800}
+.cols button{background:var(--panel);border:0;padding:0 16px;cursor:pointer;font-weight:800;font-size:15px}
 .cols button[aria-pressed=true]{background:var(--acc);color:#111}
 .count{color:var(--mut);font-size:13px;padding:10px 14px 0}
 .grid{display:grid;gap:10px;padding:10px 14px 24px;grid-template-columns:repeat(var(--n,2),1fr)}
 .card{position:relative;border:2px solid var(--c);border-radius:12px;overflow:hidden;background:var(--panel);cursor:pointer;padding:0;text-align:left;display:block;width:100%}
 .card img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top}
-.card .nm{padding:6px 8px 8px;font-weight:800;font-size:13px;line-height:1.2}
+.card .nm{display:block;padding:8px 10px 10px;font-weight:800;font-size:13px;line-height:1.2}
 .card .sm{display:block;font-weight:600;color:var(--mut);font-size:12px;margin-top:2px}
 .tag{position:absolute;top:6px;left:6px;background:var(--c);color:#111;font-weight:800;font-size:11px;padding:2px 7px;border-radius:6px}
 .grid[style*="--n:4"] .nm{font-size:10px;padding:4px 5px}.grid[style*="--n:4"] .sm{display:none}.grid[style*="--n:4"] .tag{font-size:9px;padding:1px 4px}
@@ -66,7 +66,7 @@ h1{margin:0;font-size:28px;flex:1}
   <div class="tools">
     <input id="q" type="search" autocomplete="off">
     <select id="sort" aria-label="Sort"></select>
-    <div class="cols" id="cols"><button data-n="2" aria-label="2">▮▮</button><button data-n="3" aria-label="3">▮▮▮</button><button data-n="4" aria-label="4">▮▮▮▮</button></div>
+    <div class="cols" id="cols"><button data-n="2" aria-label="2">2</button><button data-n="3" aria-label="3">3</button><button data-n="4" aria-label="4">4</button></div>
   </div>
 </header>
 <div class="count" id="count"></div>
