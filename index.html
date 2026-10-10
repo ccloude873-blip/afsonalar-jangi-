@@ -117,6 +117,7 @@ button,input,select{font:inherit;color:inherit}
 .bt{flex:1;min-width:0;display:flex;flex-direction:column}.bt b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bt i{font-style:normal;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .pgrid .card .nm{font-size:11px;padding:5px 6px 7px}.pgrid .card .sm{font-size:10px}.pgrid .tag{font-size:9px;padding:1px 5px}.pgrid .lvb{font-size:9px;padding:1px 5px}
+.sqg .lvb,.pgrid .lvb{top:26px;right:auto;left:6px}
 .chk{position:absolute;left:6px;bottom:44px;z-index:2;background:var(--emerald);color:#111;font-weight:800;font-size:11px;padding:1px 6px;border-radius:6px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;background:#1f2a24;border:1px solid #2f6b4a;color:#d8f5e4;font-weight:700;font-size:14px;padding:10px 16px;border-radius:12px;max-width:90vw;text-align:center}
 .toast.err{background:#2b1a1d;border-color:#7a2f3a;color:#ffd9de}
@@ -162,7 +163,7 @@ const IC={
  squad:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/></svg>',
  me:'<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>'};
 function save(){try{localStorage.setItem("lc_state",JSON.stringify({lang:S.lang,n:S.n,sort:S.sort}))}catch(e){}}
-function fmt(v){const a=Math.abs(v);if(a>=1e9)return+(v/1e9).toFixed(2)+"B";if(a>=1e6)return+(v/1e6).toFixed(2)+"M";if(a>=1e3)return+(v/1e3).toFixed(2)+"K";return String(v)}
+function fmt(v){const a=Math.abs(v);for(const[u,x]of[[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"K"]])if(a>=u)return+(v/u).toFixed(2)+x;return String(v)}
 function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
 const hpv=c=>c.own?c.own.hp:c.hp,strv=c=>c.own?c.own.str:c.str,pw=c=>hpv(c)+strv(c);
 function mineList(){const m=new Map(CARDS.map(c=>[c.id,c]));return (ME?ME.cards:[]).filter(o=>m.has(o.id)).map(o=>({...m.get(o.id),own:o}))}
@@ -170,7 +171,7 @@ function teamList(){return mineList().filter(c=>c.own.slot>0).sort((a,b)=>a.own.
 function tgUser(){try{return Telegram.WebApp.initDataUnsafe.user||null}catch(e){return null}}
 function tile(c,slot){
   const a=slot?`data-slot="${slot}"`:`data-k="${OPEN.push(c)-1}"`;
-  return `<button class="card" style="--c:var(--${c.tier})" ${a}><span class="tag">${TN[S.lang][c.tier]}</span>${c.own?`<span class="lvb">${t("lv")} ${c.own.lv} · ★${c.own.st}</span>`:""}<img alt="" src="${IMG[c.id]||""}"><span class="nm">${esc(c.name)}<span class="sm">${c.own?"HP "+fmt(c.own.hp)+" · STR "+fmt(c.own.str):"HP "+fmt(c.hp)+" · STR "+fmt(c.str)}</span></span></button>`;
+  return `<button class="card" style="--c:var(--${c.tier})" ${a}><span class="tag">${TN[S.lang][c.tier]}</span>${c.own?`<span class="lvb">Lv ${c.own.lv} · ★${c.own.st}</span>`:""}<img alt="" src="${IMG[c.id]||""}"><span class="nm">${esc(c.name)}<span class="sm">${c.own?"HP "+fmt(c.own.hp)+" · STR "+fmt(c.own.str):"HP "+fmt(c.hp)+" · STR "+fmt(c.str)}</span></span></button>`;
 }
 function names(ids){const m=new Map(mineList().map(c=>[c.own.rid,c.name]));return ids.map(r=>m.get(r)).filter(Boolean)}
 function drawSquad(){
@@ -222,7 +223,7 @@ function fillPicker(){
   const L=base.filter(c=>(P.tier==="all"||c.tier===P.tier)&&(!q||c.name.toLowerCase().includes(q)));
   const f={power:(a,b)=>pw(b)-pw(a),hp:(a,b)=>hpv(b)-hpv(a),str:(a,b)=>strv(b)-strv(a),name:(a,b)=>a.name.localeCompare(b.name)}[P.sort];
   L.sort(f);
-  $("pg").innerHTML=L.map(c=>`<button class="card" style="--c:var(--${c.tier})" data-r="${c.own.rid}">${c.own.slot?`<span class="chk">${c.own.slot} ✓</span>`:""}<span class="tag">${TN[S.lang][c.tier]}</span><span class="lvb">${t("lv")} ${c.own.lv} · ★${c.own.st}</span><img alt="" src="${IMG[c.id]||""}"><span class="nm">${esc(c.name)}<span class="sm">HP ${fmt(c.own.hp)} · STR ${fmt(c.own.str)}</span></span></button>`).join("")||`<p class="empty" style="grid-column:1/-1">${t("none")}</p>`;
+  $("pg").innerHTML=L.map(c=>`<button class="card" style="--c:var(--${c.tier})" data-r="${c.own.rid}">${c.own.slot?`<span class="chk">${c.own.slot} ✓</span>`:""}<span class="tag">${TN[S.lang][c.tier]}</span><span class="lvb">Lv ${c.own.lv} · ★${c.own.st}</span><img alt="" src="${IMG[c.id]||""}"><span class="nm">${esc(c.name)}<span class="sm">HP ${fmt(c.own.hp)} · STR ${fmt(c.own.str)}</span></span></button>`).join("")||`<p class="empty" style="grid-column:1/-1">${t("none")}</p>`;
 }
 function langLabel(){return S.lang==="uz"?"UZ · EN":"EN · UZ"}
 function toggleLang(){S.lang=S.lang==="uz"?"en":"uz";save();$("sptxt").textContent=t("loading");show()}
