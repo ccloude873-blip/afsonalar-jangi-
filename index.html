@@ -259,6 +259,39 @@ button,input,select{font:inherit;color:inherit}
 .dclaim{opacity:0;pointer-events:none;transition:opacity .4s}.dclaim.on{opacity:1;pointer-events:auto}
 @media (prefers-reduced-motion:reduce){.flip{transition:none}.flip.on.glow .face.fr,.dflash,.draw .rays{animation:none}.dn,.dst{transition:none}}
 @media (min-width:700px){.grid{grid-template-columns:repeat(calc(var(--n,2) + 2),1fr)}.sheet{align-items:center}.pane{border-radius:18px}}
+/* ===== v256: Donat + videodagi yorug'lik va animatsiyalar ===== */
+@keyframes tin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes sweep{0%,55%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:0 0}}
+.nav button[aria-pressed=true]{background:linear-gradient(180deg,rgba(255,90,60,.22),transparent 85%);box-shadow:inset 0 2px 0 var(--acc),0 -5px 16px -6px rgba(255,90,60,.75)}
+.box{position:relative;background:linear-gradient(180deg,#171622,#12111b);box-shadow:0 10px 26px -16px #000;animation:tin .4s both}
+.box::before,.box::after{content:"";position:absolute;top:-1px;width:26px;height:26px;pointer-events:none;border-top:2px solid #b9923f;filter:drop-shadow(0 0 5px rgba(212,160,44,.6))}
+.box::before{left:-1px;border-left:2px solid #b9923f;border-top-left-radius:14px}
+.box::after{right:-1px;border-right:2px solid #b9923f;border-top-right-radius:14px}
+.mt{background:linear-gradient(180deg,#171622,#12111b);animation:tin .45s both;animation-delay:calc(var(--i,0)*60ms)}
+.mt:active{transform:scale(.97)}
+.mt .mi{border:1px solid rgba(255,90,60,.28);background:rgba(255,90,60,.08);box-shadow:0 0 16px -4px rgba(255,90,60,.55)}
+.dh{display:flex;align-items:center;gap:9px;margin:0 0 12px;font:700 22px/1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.05em;text-transform:uppercase}
+.dh::before{content:"";width:8px;height:8px;background:var(--acc);transform:rotate(45deg);box-shadow:0 0 9px var(--acc);flex:none}
+.dnote{margin:12px 14px 0;font-size:12px;color:var(--mut);text-align:center}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dtl{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid var(--line);background:linear-gradient(180deg,#1c1b2a,#13121c);border-radius:10px;padding:9px 4px 8px;cursor:pointer;color:var(--tx);animation:tin .45s both;animation-delay:calc(var(--i,0)*45ms)}
+.dtl b{font:800 14px/1.1 Manrope,sans-serif}
+.dtl em{font:800 16px/1.1 Manrope,sans-serif;font-style:normal;color:#f6c744;text-shadow:0 0 10px rgba(246,199,68,.35)}
+.dtl small{font-size:10px;color:var(--mut);font-weight:700}
+.dtl::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.09) 50%,transparent 62%);transform:translateX(-130%);animation:sweep 5s ease-in-out infinite;animation-delay:calc(var(--i,0)*.28s + 1.2s)}
+.dtl:active{transform:scale(.96);border-color:var(--acc)}
+.drow{display:flex;align-items:center;gap:11px}
+.drow .di{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
+.drow .dx{flex:1;min-width:0}.drow .dx b{display:block;font-size:15px}.drow .dx i{display:block;font-style:normal;font-size:12px;color:var(--mut);line-height:1.3;margin-top:2px}
+.skb{height:150px;margin:12px 14px 0;border:1px solid var(--line);border-radius:14px;background:linear-gradient(90deg,#14131d 25%,#201f2e 37%,#14131d 63%);background-size:400% 100%;animation:shim 1.4s ease infinite}
+.dpay .meta{margin-top:6px}
+.dpb{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:12px;padding:15px 16px;border-radius:12px;border:1px solid #7a5f1a;background:linear-gradient(180deg,#2d2511,#1b170c);color:#ffe29a;font:800 15px/1 Manrope,sans-serif;cursor:pointer;box-shadow:0 0 20px -6px rgba(240,191,63,.6)}
+.dpb b{font:700 21px/1 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.03em}
+.dpb.mn{border-color:#2f6b4a;background:linear-gradient(180deg,#15281e,#0e1813);color:#bff0d2;box-shadow:0 0 20px -6px rgba(52,211,153,.5)}
+.dpb:disabled{opacity:.5;cursor:default}.dpb:not(:disabled):active{transform:scale(.98)}
+.dhint{margin-top:14px;font-size:12px;line-height:1.4}
+@media (prefers-reduced-motion:reduce){.box,.mt,.dtl,.skb{animation:none}.dtl::after{display:none}}
 </style>
 </head>
 <body>
@@ -302,6 +335,8 @@ Object.assign(T.uz,{retry:"Qayta urinish",closeApp:"Yopish",nArena:"Arena",fwT:"
 Object.assign(T.en,{retry:"Retry",closeApp:"Close",nArena:"Arena",fwT:"FACTION WARS",fwSub:"A run of several battles in a row",fac:"Faction",season:"Season ends in",mut:"MUTATOR OF THE DAY",battleN:"battle(s)",rewardL:"reward",fightBtn:"Fight",doneToday:"won today",board:"Faction ranking",pickT:"CHOOSE YOUR FACTION",pickW:"Careful: you cannot change this later!",fight:"FIGHT",fwar:"Faction war",yourAtk:"Your turn: attack",yourDef:"Your turn: defence",pickSw:"Pick a fighter",won1:"Battle won",turn:"TURN",fullBoard:"Full board",attack:"Attack",block:"Block",dodge:"Dodge",counter:"Counter",swap:"Switch fighter",next:"Next battle",back:"Back",dmg:"damage",youTake:"you take",chance:"chance",came:"What came before",stuck:"Fight stuck?",stuckT:"If the fight does not respond, surrender and start again.",surr:"Surrender",won:"VICTORY",lost:"DEFEAT",quit:"SURRENDERED",turns:"turns",ptsL:"faction points",failed:"Run failed. You can start over.",boardT:"FACTION RANKING",wait:"Loading…"});
 Object.assign(T.uz,{nMore:"Ko'proq",nShop:"Do'kon",mShop:"Do'kon",mShopS:"Paketlar va xaridlar",mProf:"Profil",mProfS:"Hamyon va progress",walT:"HAMYON",freeT:"BEPUL PAKETLAR",freeS:"kuniga bir necha marta",paidT:"PULLIK PAKETLAR",paidS:"karta tasodifiy, daraja kafolatli",openB:"OCHISH",inT:"yana",hh:"soat",mm:"daq",oneRand:"1 ta tasodifiy {t} karta",geDesc:"Oltin; har 41-chisi Emerald kafolatli",dailyN:"KUNLIK SOVG'A",cardDrawn:"KARTA TUSHDI",cardsDrawn:"KARTALAR TUSHDI",claim:"OLISH",newC:"YANGI KARTA",upC:"KUCHAYDI",maxC:"MAKSIMUM: QAYTARILDI",bought:"Sotib olindi",skulls2:"KALLA",souls2:"JON",gems2:"GEMS",noMoney:"Mablag' yetmaydi"});
 Object.assign(T.en,{nMore:"More",nShop:"Shop",mShop:"Shop",mShopS:"Packs and purchases",mProf:"Profile",mProfS:"Wallet and progress",walT:"WALLET",freeT:"FREE PACKS",freeS:"several times a day",paidT:"PAID PACKS",paidS:"the card is random, the tier is guaranteed",openB:"OPEN",inT:"in",hh:"h",mm:"min",oneRand:"1 random {t} card",geDesc:"Gold; every 41st is a guaranteed Emerald",dailyN:"DAILY GIFT",cardDrawn:"CARD DRAWN",cardsDrawn:"CARDS DRAWN",claim:"CLAIM",newC:"NEW CARD",upC:"UPGRADED",maxC:"MAX: REFUNDED",bought:"Purchased",skulls2:"SKULLS",souls2:"SOULS",gems2:"GEMS",noMoney:"Not enough funds"});
+Object.assign(T.uz,{nDon:"Donat",mDon:"Donat",mDonS:"Valyuta va paketlar",donPack:"PAKETLAR",donSouls:"JONLAR",donSkulls:"KALLALAR",donGems:"GEMS",starter:"Boshlang'ich paket",starterD:"15 ta Bronza + 10 ta Kumush + 5 ta Oltin karta, hammasi har xil",donCredit:"Hisobingizga {a} qo'shiladi",som:"so'm",payStars:"Stars bilan to'lash",payMoney:"Pulda to'lash",invSent:"{s}\u2B50 uchun hisob-faktura botdagi chatingizga yuborildi \u2014 shu yerda to'lang.",msgSent:"Xabar botdagi chatingizga yuborildi \u2014 @Miko_manhwa ga yozing.",donFail:"Chatga yuborib bo'lmadi. Botga /start bosib, qayta urinib ko'ring.",donNote:"\u2B50 Stars \u2014 avtomatik \u00B7 \u{1F4B3} Pul \u2014 @Miko_manhwa orqali",payHint:"Stars: hisob-faktura chatga keladi, to'laganingizdan so'ng avtomatik tushadi. Pul: xabar chatga keladi, @Miko_manhwa ga yozing."});
+Object.assign(T.en,{nDon:"Donate",mDon:"Donate",mDonS:"Currency and packs",donPack:"PACKS",donSouls:"SOULS",donSkulls:"SKULLS",donGems:"GEMS",starter:"Starter Pack",starterD:"15 bronze + 10 silver + 5 gold cards, all different",donCredit:"{a} will be credited to your account",som:"UZS",payStars:"Pay with Stars",payMoney:"Pay with money",invSent:"An invoice for {s}\u2B50 was sent to your chat with the bot \u2014 pay there.",msgSent:"A message was sent to your chat with the bot \u2014 write to @Miko_manhwa.",donFail:"Couldn't send to chat. Press /start in the bot and try again.",donNote:"\u2B50 Stars \u2014 automatic \u00B7 \u{1F4B3} Money \u2014 via @Miko_manhwa",payHint:"Stars: the invoice arrives in chat and is credited automatically after you pay. Money: a message arrives in chat, write to @Miko_manhwa."});
 let S={screen:"hub",lang:"uz",view:"squad",tier:"all",q:"",sort:"power",n:4,more:null},ME=null,OPEN=[],DIAG="";
 try{const s=JSON.parse(localStorage.getItem("lc_state")||"{}");if(s.lang)S.lang=s.lang;if(s.n)S.n=s.n;if(s.sort)S.sort=s.sort}catch(e){}
 const $=id=>document.getElementById(id);
@@ -510,7 +545,8 @@ function drawMore(){
   const el=$("morev");
   if(S.more==="shop"){drawShop(el);return}
   if(S.more==="profile"){drawProfile(el);return}
-  el.innerHTML=`<div class="mgrid"><button class="mt" data-mo="shop"><span class="mi">${IC.bag}</span><b>${t("mShop")}</b><i>${t("mShopS")}</i></button><button class="mt" data-mo="profile"><span class="mi">${IC.me}</span><b>${t("mProf")}</b><i>${t("mProfS")}</i></button></div>`;
+  if(S.more==="donate"){drawDonate(el);return}
+  el.innerHTML=`<div class="mgrid"><button class="mt" data-mo="donate" style="--i:0"><span class="mi">${IC.star}</span><b>${t("mDon")}</b><i>${t("mDonS")}</i></button><button class="mt" data-mo="shop" style="--i:1"><span class="mi">${IC.bag}</span><b>${t("mShop")}</b><i>${t("mShopS")}</i></button><button class="mt" data-mo="profile" style="--i:2"><span class="mi">${IC.me}</span><b>${t("mProf")}</b><i>${t("mProfS")}</i></button></div>`;
 }
 function drawProfile(el){
   if(!ME){el.innerHTML=nd();return}
@@ -579,11 +615,55 @@ function showDraw(cards,msg){
     DTM.forEach(clearTimeout);DTM=[];cards.forEach((c,i)=>{const f=$("fl"+i),n=$("dn"+i);f&&f.classList.add("on","glow");n&&n.classList.add("on")});done();
   };
 }
+IC.star='<svg class="ic" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>';
+const DN={menu:null,loading:false,err:false,busy:false};
+const fmtn=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+const dshort=n=>n>=10000?fmt(n):fmtn(n);
+async function donLoad(){
+  if(DN.loading)return;DN.loading=true;DN.err=false;
+  try{const r=await call("/api/donate/menu");DN.menu=r.menu}catch(e){DN.err=true}
+  DN.loading=false;if(S.view==="more"&&S.more==="donate")drawMore();
+}
+function donTitle(it){return it.kind==="pack"?"\u{1F381} "+t("starter"):fmtn(it.amt)+" "+PCUR[it.kind]}
+function donDesc(it){return it.kind==="pack"?t("starterD"):t("donCredit").replace("{a}",fmtn(it.amt)+" "+PCUR[it.kind])}
+function drawDonate(el){
+  if(!ME){el.innerHTML=nd();return}
+  const m=DN.menu;
+  if(!m){if(DN.err){el.innerHTML=nd()}else{el.innerHTML='<div class="skb"></div><div class="skb" style="height:110px"></div><div class="skb"></div>';donLoad()}return}
+  let i=0;
+  const tile=it=>`<button class="dtl" data-don="${it.k}" style="--i:${i++}"><b>${PCUR[it.kind]} ${dshort(it.amt)}</b><em>${it.stars}\u2B50</em><small>${fmtn(it.som)} ${t("som")}</small></button>`;
+  const grp=(kind,tt)=>`<div class="box"><h2 class="dh">${t(tt)}</h2><div class="dgrid">${m.items.filter(x=>x.kind===kind).map(tile).join("")}</div></div>`;
+  const st=m.items.find(x=>x.kind==="pack");
+  const pack=st?`<div class="box"><h2 class="dh">${t("donPack")}</h2><div class="drow"><span class="di">\u{1F381}</span><div class="dx"><b>${t("starter")}</b><i>${t("starterD")}</i></div><button class="dtl" data-don="${st.k}" style="--i:0;width:86px;flex:none"><em>${st.stars}\u2B50</em><small>${fmtn(st.som)} ${t("som")}</small></button></div></div>`:"";
+  el.innerHTML=`<p class="dnote">${t("donNote")}</p>`+pack+grp("souls","donSouls")+grp("skulls","donSkulls")+grp("gems","donGems");
+}
+function donOpen(k){
+  const it=DN.menu&&DN.menu.items.find(x=>x.k===k);if(!it)return;
+  SHEET=true;$("pane").style.setProperty("--c","#f0bf3f");
+  $("pane").innerHTML=`<div class="hdl"></div><button class="close" id="x" aria-label="${t("close")}">\u00D7</button><div class="in dpay"><h2 class="hd nameh">${esc(donTitle(it))}</h2><div class="meta">${esc(donDesc(it))}</div><button class="dpb" data-dpay="stars"><span>\u2B50 ${t("payStars")}</span><b>${it.stars}\u2B50</b></button><button class="dpb mn" data-dpay="money"><span>\u{1F4B3} ${t("payMoney")}</span><b>${fmtn(it.som)} ${t("som")}</b></button><p class="meta dhint">${t("payHint")}</p></div>`;
+  $("sheet").classList.add("on");$("x").onclick=close_;
+  document.querySelectorAll("[data-dpay]").forEach(b=>b.onclick=()=>donPay(k,b.dataset.dpay));
+}
+async function donPay(k,how){
+  if(DN.busy)return;DN.busy=true;
+  const bs=document.querySelectorAll("[data-dpay]");bs.forEach(b=>b.disabled=true);
+  const it=DN.menu.items.find(x=>x.k===k);
+  try{
+    await call("/api/donate/"+how,{k});
+    close_();toast(how==="stars"?t("invSent").replace("{s}",it.stars):t("msgSent"));
+    try{Telegram.WebApp.HapticFeedback.notificationOccurred("success")}catch(x){}
+  }catch(e){
+    const m=e&&e.message?String(e.message):"";
+    toast(/^4\d\d$/.test(m)?t("donFail"):t("err"),true);bs.forEach(b=>b.disabled=false);
+  }
+  DN.busy=false;
+}
 $("morev").onclick=e=>{
   const g=s=>e.target.closest(s);let b;
-  if(b=g("[data-mo]")){S.more=b.dataset.mo;if(S.more==="shop")SH.menu=null;drawHead();drawMore();window.scrollTo(0,0)}
+  if(b=g("[data-mo]")){S.more=b.dataset.mo;if(S.more==="shop")SH.menu=null;if(S.more==="donate")DN.menu=null;drawHead();drawMore();window.scrollTo(0,0)}
   else if(b=g("[data-free]")){shopAct("/api/shop/free",{k:b.dataset.free})}
   else if(b=g("[data-buy]")){if(!b.disabled)shopAct("/api/shop/buy",{k:b.dataset.buy,qty:+b.dataset.q})}
+  else if(b=g("[data-don]")){donOpen(b.dataset.don)}
 };
 setInterval(()=>{
   if(S.view!=="more"||S.more!=="shop"||!SH.menu||SH.busy)return;
@@ -605,7 +685,7 @@ function cur(e,v){return `<span class="cur"><span>${e}</span>${fmt(v||0)}</span>
 function drawHead(){
   const v=S.view,base=mineList();
   $("back").innerHTML=IC.back;$("gico").innerHTML=IC.cards;
-  $("sub").textContent=t(v==="more"?(S.more==="shop"?"nShop":S.more==="profile"?"nMe":"nMore"):{squad:"nSquad",cards:"nCards",arena:"nArena"}[v]);
+  $("sub").textContent=t(v==="more"?(S.more==="shop"?"nShop":S.more==="profile"?"nMe":S.more==="donate"?"nDon":"nMore"):{squad:"nSquad",cards:"nCards",arena:"nArena"}[v]);
   $("curs").hidden=!ME;$("curs").innerHTML=ME?cur("💀",ME.skulls)+cur("👻",ME.souls)+cur("💎",ME.gems):"";
   $("q").placeholder=t("search");
   $("sort").innerHTML=["power","hp","str","name"].map(k=>`<option value="${k}"${S.sort===k?" selected":""}>${t(k)}</option>`).join("");
