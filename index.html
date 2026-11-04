@@ -49,8 +49,37 @@ input.f,select.f{width:100%;padding:11px;margin:5px 0;border-radius:10px;border:
 .sum div{display:flex;justify-content:space-between;padding:3px 0;font-size:14px}
 .sum .t{font-weight:800;font-size:17px}
 .empty{text-align:center;color:var(--mut);padding:40px 0}
+
+/* ---- soya, animatsiya ---- */
+.card{box-shadow:0 6px 18px #0000001f;animation:up .45s cubic-bezier(.2,.8,.2,1) both;transition:transform .15s,box-shadow .15s}
+.card:active{transform:scale(.96);box-shadow:0 2px 6px #00000022}
+.row{box-shadow:0 3px 10px #0000001a;animation:up .35s both}
+.banner{box-shadow:0 8px 22px #6c3df455;background-size:200% 200%;animation:flow 6s ease infinite,up .5s both}
+.btn{box-shadow:0 6px 16px #6c3df455;transition:transform .12s,box-shadow .12s}.btn:active{transform:scale(.97);box-shadow:0 2px 6px #6c3df455}
+.btn.alt{box-shadow:none}
+.cat,.chip{transition:all .2s;box-shadow:0 2px 6px #0000000f}.cat:active,.chip:active{transform:scale(.93)}
+.cat.on,.chip.on{box-shadow:0 4px 12px #6c3df466}
+nav{box-shadow:0 -6px 20px #00000026}nav button{transition:transform .15s,color .2s}nav button:active{transform:scale(.88)}
+.search{box-shadow:0 3px 10px #0000000f;transition:box-shadow .2s,border-color .2s}.search:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 3px #6c3df433}
+.fav{transition:transform .2s}.fav:active{transform:scale(1.5)}
+.sheet{background:#0000;transition:background .25s}.sheet.show{background:#0008;animation:fade .25s}
+.sheet.show .box{animation:slide .32s cubic-bezier(.2,.8,.2,1);box-shadow:0 -10px 30px #00000055}
+.logo{background-size:200% auto;animation:flow 5s linear infinite}
+.bump span{animation:bump .45s}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#17171cee;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:50;box-shadow:0 8px 24px #0000006e;animation:toast 1.6s both;white-space:nowrap}
+.sk{height:190px;border-radius:14px;background:linear-gradient(100deg,var(--card) 30%,var(--bd) 50%,var(--card) 70%);background-size:200% 100%;animation:sh 1.2s linear infinite}
+.snd{position:absolute;right:12px;top:10px;background:var(--card);border:1px solid var(--bd);border-radius:50%;width:36px;height:36px;font-size:16px;box-shadow:0 3px 8px #0000001f}
+header{position:sticky}
+@keyframes up{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes slide{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.5) rotate(-12deg)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,14px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-8px)}}
+@keyframes sh{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<header><div class="logo">TRENDIX</div><input id="q" class="search" placeholder="🔍 Mahsulot qidirish..."></header>
+<header><div class="logo">TRENDIX</div><button class="snd" id="snd" onclick="togSnd()">🔊</button><input id="q" class="search" placeholder="🔍 Mahsulot qidirish..."></header>
 <main id="main"></main>
 <nav id="nav"></nav>
 <div class="sheet" id="sheet"><div class="box" id="box"></div></div>
@@ -74,6 +103,15 @@ async function api(path,body){
  let j={};try{j=await r.json()}catch{}
  if(!r.ok)throw new Error(j.error||("Xatolik "+r.status));return j}
 
+
+let SND=L("tx_snd",true),AC;
+function beep(f,d=.08,t="sine",v=.15,w=0){if(!SND)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime+w;o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d)}catch{}}
+const sfx={tap:()=>beep(520,.05,"sine",.1),fav:()=>beep(760,.09,"sine",.13),add:()=>{beep(660,.08);beep(990,.12,"sine",.15,.08)},ok:()=>[523,659,784,1047].forEach((f,i)=>beep(f,.16,"triangle",.17,i*.1)),err:()=>beep(190,.22,"square",.08)};
+function hap(k){try{const h=tg&&tg.HapticFeedback;if(!h)return;k==="ok"?h.notificationOccurred("success"):k==="err"?h.notificationOccurred("error"):h.impactOccurred("light")}catch{}}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1600)}
+function togSnd(){SND=!SND;S("tx_snd",SND);$("snd").textContent=SND?"🔊":"🔇";if(SND)sfx.tap()}
+document.addEventListener("click",e=>{if(e.target.closest(".card,.cat,.chip,nav button,.q button"))sfx.tap();if(e.target.closest(".card,.cat,nav button"))hap()});
+
 let P=[],B=[],online=null;
 let st={tab:"home",cat:null,q:"",cart:L("tx_cart",[]),fav:L("tx_fav",[]),orders:[],promo:null,busy:false};
 const save=()=>{S("tx_cart",st.cart);S("tx_fav",st.fav)};
@@ -87,8 +125,8 @@ async function init(){
 }
 async function loadOrders(){try{st.orders=(await api("/api/my-orders")).orders}catch{}render()}
 
-function cardH(p){const off=p.old?Math.round((1-p.price/p.old)*100):0;
-return `<div class="card" onclick="openP(${p.id})"><div class="pic">${pic(p)}</div>
+function cardH(p,i=0){const off=p.old?Math.round((1-p.price/p.old)*100):0;
+return `<div class="card" style="animation-delay:${Math.min(i,12)*45}ms" onclick="openP(${p.id})"><div class="pic">${pic(p)}</div>
 ${off>0?`<span class="badge">-${off}%</span>`:""}
 <button class="fav" onclick="event.stopPropagation();tf(${p.id})">${st.fav.includes(p.id)?"❤️":"🤍"}</button>
 <div class="info">${esc(p.name)}<div class="mut">⭐ ${p.rating} · ${p.stock>0?"qoldi: "+p.stock:"tugagan"}</div>
@@ -102,9 +140,9 @@ function render(){
   if(!st.q&&st.cat===null)h+=B.map(b=>`<div class="banner">${esc(b.title)}<small>${esc(b.text)}</small></div>`).join("");
   h+=`<div class="cats"><div class="cat ${st.cat===null?"on":""}" onclick="sc(null)">Barchasi</div>${CATS.map((c,i)=>`<div class="cat ${st.cat===i?"on":""}" onclick="sc(${i})">${c[0]} ${c[1]}</div>`).join("")}</div>`;
   h+=`<h3>${st.q?"Qidiruv natijasi":st.cat===null?"Tavsiyalar":CATS[st.cat][1]}</h3>`;
-  h+=list.length?`<div class="grid">${list.map(cardH).join("")}</div>`:`<div class="empty">${online===null?"Yuklanmoqda...":"Hech narsa topilmadi 😕"}</div>`;
+  h+=list.length?`<div class="grid">${list.map((p,i)=>cardH(p,i)).join("")}</div>`:(online===null?`<div class="grid">${"<div class=\"sk\"></div>".repeat(4)}</div>`:`<div class="empty">Hech narsa topilmadi 😕</div>`);
  }
- if(st.tab==="fav"){const l=P.filter(p=>st.fav.includes(p.id));h+=`<h3>❤️ Sevimlilar</h3>`+(l.length?`<div class="grid">${l.map(cardH).join("")}</div>`:`<div class="empty">Hali sevimli mahsulot yo'q</div>`)}
+ if(st.tab==="fav"){const l=P.filter(p=>st.fav.includes(p.id));h+=`<h3>❤️ Sevimlilar</h3>`+(l.length?`<div class="grid">${l.map((p,i)=>cardH(p,i)).join("")}</div>`:`<div class="empty">Hali sevimli mahsulot yo'q</div>`)}
  if(st.tab==="cart")h+=cartH();
  if(st.tab==="orders")h+=`<h3>📦 Buyurtmalarim</h3>`+(st.orders.length?st.orders.map(o=>`<div class="row"><div class="grow"><b>#${esc(o.id)}</b> · ${esc(o.date)}<br>${o.items.map(i=>esc(i.name)+" ×"+i.qty).join(", ")}<br><b>${m(o.total)}</b> · ${esc(o.pay)}<br><span class="mut">Holat: <b>${esc(o.status)}</b></span></div></div>`).join(""):`<div class="empty">Buyurtmalar yo'q</div>`);
  $("main").innerHTML=h;
@@ -122,7 +160,7 @@ function cartH(){
 }
 function go(t){st.tab=t;render();window.scrollTo(0,0);if(t==="orders")loadOrders()}
 function sc(c){st.cat=c;render()}
-function tf(id){st.fav=st.fav.includes(id)?st.fav.filter(x=>x!==id):[...st.fav,id];save();render()}
+function tf(id){if(!st.fav.includes(id)){sfx.fav();hap()}st.fav=st.fav.includes(id)?st.fav.filter(x=>x!==id):[...st.fav,id];save();render()}
 function qty(k,d){const i=st.cart[k];i.qty+=d;if(i.qty<=0)st.cart.splice(k,1);else if(i.qty>pr(i.id).stock)i.qty=pr(i.id).stock;save();render()}
 async function applyPromo(){const v=$("pc").value.trim();if(!v){st.promo=null;return render()}
  try{st.promo=await api("/api/promo",{code:v})}catch(e){st.promo=null;alert(e.message)}render()}
@@ -137,7 +175,7 @@ function openP(id){const p=pr(id);sel={id,size:p.sizes[0]||"",color:p.colors[0]|
  $("sheet").classList.add("show")}
 function pick(k,el){sel[k]=el.textContent;[...el.parentNode.children].forEach(c=>c.classList.remove("on"));el.classList.add("on")}
 function closeS(){$("sheet").classList.remove("show")}
-function addCart(){const e=st.cart.find(i=>i.id===sel.id&&i.size===sel.size&&i.color===sel.color);if(e){if(e.qty<pr(sel.id).stock)e.qty++}else st.cart.push({...sel});save();closeS();render()}
+function addCart(){const e=st.cart.find(i=>i.id===sel.id&&i.size===sel.size&&i.color===sel.color);if(e){if(e.qty<pr(sel.id).stock)e.qty++}else st.cart.push({...sel});save();closeS();render();sfx.add();hap();toast("✅ Savatga qo'shildi");const nb=$("nav").children[2];nb.classList.remove("bump");void nb.offsetWidth;nb.classList.add("bump")}
 function checkout(){const t=totals();const u=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
  $("box").innerHTML=`<h3>Buyurtmani rasmiylashtirish</h3>
  <input class="f" id="nm" placeholder="Ism familiya" value="${esc([u.first_name,u.last_name].filter(Boolean).join(" "))}">
@@ -157,11 +195,11 @@ async function placeOrder(){
  try{
   await api("/api/order",{items:st.cart,name,phone,region:$("rg").value,address,pay:$("py").value,promo:st.promo?st.promo.code:""});
   st.cart=[];st.promo=null;save();closeS();
-  if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred("success");
+  sfx.ok();hap("ok");toast("🎉 Buyurtma qabul qilindi!");
   await init();go("orders");
- }catch(e){alert(e.message);b.disabled=false;b.textContent="✅ Tasdiqlash"}
+ }catch(e){sfx.err();hap("err");alert(e.message);b.disabled=false;b.textContent="✅ Tasdiqlash"}
 }
 $("q").addEventListener("input",e=>{st.q=e.target.value;st.tab="home";render()});
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")closeS()});
-render();init();
+$("snd").textContent=SND?"🔊":"🔇";render();init();
 </script></body></html>
