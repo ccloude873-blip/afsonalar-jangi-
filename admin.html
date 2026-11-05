@@ -44,11 +44,112 @@ input.f,select.f,textarea.f{width:100%;padding:10px;margin:4px 0;border-radius:1
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+/* ---- umumiy: ikonlar, bosish effekti, ripple, soya ---- */
+.ic{display:inline-block;vertical-align:-4px;flex:none}
+.ic.filled{fill:currentColor}
+.pressed{transform:scale(.93)!important;transition:transform .08s!important;filter:brightness(.95)}
+.rip{position:absolute;border-radius:50%;background:#ffffff66;transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+.fly{position:fixed;width:18px;height:18px;border-radius:50%;background:var(--ac2);z-index:80;box-shadow:0 0 14px var(--ac2);pointer-events:none}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#17171cf2;color:#fff;padding:11px 18px;border-radius:22px;font-size:14px;z-index:90;box-shadow:0 10px 28px #0000007a;animation:toast 1.8s both;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.toast .ic{color:#4cd964}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+@keyframes up{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes slide{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.55) rotate(-14deg)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes heart{0%{transform:scale(1)}30%{transform:scale(1.7)}60%{transform:scale(.85)}100%{transform:scale(1)}}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,16px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-8px)}}
+@keyframes sh{to{background-position:-200% 0}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+.snd{position:absolute;right:12px;top:8px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0000002b}
+.tab{display:flex;gap:6px;align-items:center}.btn{display:flex;gap:6px;align-items:center;justify-content:center}.btn.sm{display:inline-flex}
+.th{box-shadow:0 3px 8px #0000001f}
 </style></head><body>
-<header><div class="logo">TRENDIX · ADMIN</div><div class="tabs" id="tabs"></div></header>
+<header><div class="logo">TRENDIX · ADMIN</div><button class="snd" id="snd" onclick="togSnd()"></button><div class="tabs" id="tabs"></div></header>
 <main id="main"><div class="empty">Yuklanmoqda...</div></main>
 <div class="sheet" id="sheet"><div class="box" id="box"></div></div>
 <script>
+/* ---- IKONLAR (SVG) ---- */
+const IC={
+home:'<path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+heart:'<path d="M12 21s-7.5-4.6-9.5-9.6A5.3 5.3 0 0 1 12 6.4a5.3 5.3 0 0 1 9.5 5C19.500 16.400 12 21 12 21z"/>',
+cart:'<path d="M3 4h2.2l2.3 11.2a1 1 0 0 0 1 .8h9.3a1 1 0 0 0 1-.8L20.500 8H6"/><circle cx="9.500" cy="20" r="1.400"/><circle cx="17.500" cy="20" r="1.400"/>',
+box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.500-3.500"/>',
+volon:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.500 8.500a5 5 0 0 1 0 7M19 6a8.500 8.500 0 0 1 0 12"/>',
+voloff:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="m17 9 5 6M22 9l-5 6"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
+star:'<path d="m12 3 2.700 5.600 6.100.9-4.400 4.300 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/>',
+check:'<path d="m5 12.500 4.500 4.500L19 7.500"/>',
+trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.500 6.500 4 4"/>',
+close:'<path d="M6 6l12 12M18 6 6 18"/>',
+alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.500" cy="8.500" r="1.200"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+phone2:'<path d="M5 3h4l2 5-2.500 1.500a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"/>',
+pin:'<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.500"/>',
+chart:'<path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-8"/>',
+receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+users:'<circle cx="9" cy="8" r="3.500"/><path d="M2 20a7 7 0 0 1 14 0M16 4.500a3.500 3.500 0 0 1 0 7M19 20a6 6 0 0 0-3-5.200"/>',
+image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.800"/><path d="m4 18 5-5 4 4 3-3 4 4"/>',
+save:'<path d="M5 3h11l4 4v14H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
+/* kategoriyalar */
+shirt:'<path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+dress:'<path d="M9 3h6l-1 6 4.500 12h-13L10 9z"/>',
+baby:'<circle cx="12" cy="12" r="9"/><path d="M8.500 14a4.500 4.500 0 0 0 7 0M9 9.500h.01M15 9.500h.01"/>',
+shoe:'<path d="M2 17v-3.500l4.500-1 3-5 3 3 5 1.500c2 .6 4.500 1.500 4.500 3.500V17z"/><path d="M2 20h20"/>',
+phone:'<rect x="7" y="2.500" width="10" height="19" rx="2.500"/><path d="M11 18.500h2"/>',
+headset:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><path d="M4 15a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2zM20 15a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2z"/>',
+washer:'<rect x="5" y="2.500" width="14" height="19" rx="2"/><circle cx="12" cy="13.500" r="4"/><path d="M8 6h.01M11 6h2"/>',
+apple:'<path d="M12 7c-2-2-7-1-7 5 0 5 3 9 5 9 1 0 1.500-.6 2-.6s1 .6 2 .6c2 0 5-4 5-9 0-6-5-7-7-5z"/><path d="M12 7c0-2 1-3.500 3-4"/>',
+sparkle:'<path d="m12 3 1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800zM19 16l.8 2.200L22 19l-2.200.8L19 22l-.8-2.200L16 19l2.200-.8z"/>',
+sofa:'<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M3 11a2 2 0 0 1 2 2v2h14v-2a2 2 0 0 1 4 0v5H1v-5a2 2 0 0 1 2-2zM5 20v1M19 20v1"/>',
+ball:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.600 5.600c3 3 3 9.800 0 12.800M18.400 5.600c-3 3-3 9.800 0 12.800"/>'
+};
+const CI=["shirt","dress","baby","shoe","phone","headset","washer","apple","sparkle","sofa","ball","box"];
+const ic=(n,s=22,c="")=>`<svg class="ic ${c}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${IC[n]||""}</svg>`;
+const noEmoji=t=>String(t??"").replace(/[\u2190-\u2BFF\u{1F000}-\u{1FAFF}\uFE0F\u200D]/gu,"").trim();
+
+/* ---- OVOZLAR (WAV, har qanday telefonda ishlaydi) ---- */
+let SND=true;try{SND=JSON.parse(localStorage.getItem("tx_snd")??"true")}catch{}
+function wav(notes){const sr=22050,T=Math.max(...notes.map(n=>n[1]+n[2]))+.05,N=Math.floor(sr*T),d=new Int16Array(N);
+ for(const[f,s,du,ty,v]of notes){const a=Math.floor(s*sr),n=Math.floor(du*sr);for(let i=0;i<n&&a+i<N;i++){const t=i/sr,env=Math.min(1,i/150)*Math.pow(1-i/n,1.6);
+  const x=ty==="sq"?(Math.sin(6.2832*f*t)>0?.6:-.6):ty==="tri"?(2/Math.PI)*Math.asin(Math.sin(6.2832*f*t)):Math.sin(6.2832*f*t);d[a+i]+=Math.round(x*env*v*32767)}}
+ const b=new ArrayBuffer(44+N*2),w=new DataView(b),W=(o,s)=>[...s].forEach((c,i)=>w.setUint8(o+i,c.charCodeAt(0)));
+ W(0,"RIFF");w.setUint32(4,36+N*2,true);W(8,"WAVEfmt ");w.setUint32(16,16,true);w.setUint16(20,1,true);w.setUint16(22,1,true);w.setUint32(24,sr,true);w.setUint32(28,sr*2,true);w.setUint16(32,2,true);w.setUint16(34,16,true);W(36,"data");w.setUint32(40,N*2,true);
+ for(let i=0;i<N;i++)w.setInt16(44+i*2,d[i],true);return URL.createObjectURL(new Blob([b],{type:"audio/wav"}))}
+const SFX={
+ tap:[[700,0,.07,"sin",.5]],
+ pop:[[420,0,.07,"sin",.45],[640,.05,.1,"sin",.45]],
+ fav:[[784,0,.09,"sin",.5],[1175,.07,.16,"sin",.5]],
+ add:[[660,0,.1,"tri",.55],[990,.09,.2,"tri",.55]],
+ del:[[520,0,.08,"tri",.5],[300,.07,.16,"tri",.5]],
+ ok:[[523,0,.14,"tri",.55],[659,.11,.14,"tri",.55],[784,.22,.14,"tri",.55],[1047,.33,.4,"tri",.55]],
+ err:[[230,0,.18,"sq",.35],[170,.13,.3,"sq",.35]]};
+const SU={};
+function play(n){if(!SND||!SFX[n])return;try{const a=new Audio(SU[n]||(SU[n]=wav(SFX[n])));a.volume=1;a.play().catch(()=>{})}catch{}}
+function hap(k){try{const h=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback;if(!h)return;k==="ok"?h.notificationOccurred("success"):k==="err"?h.notificationOccurred("error"):h.impactOccurred(k==="heavy"?"medium":"light")}catch{}}
+function toast(t){const d=document.createElement("div");d.className="toast";d.innerHTML=ic("check",18)+"<span>"+t+"</span>";document.body.appendChild(d);setTimeout(()=>d.remove(),1800)}
+function togSnd(){SND=!SND;try{localStorage.setItem("tx_snd",JSON.stringify(SND))}catch{}sndIcon();if(SND)play("pop")}
+function sndIcon(){const b=document.getElementById("snd");if(b)b.innerHTML=ic(SND?"volon":"voloff",18)}
+
+/* ---- BOSISH EFFEKTI + RIPPLE + TOVUSH (hamma tugmada) ---- */
+const PRESS=".btn,.chip,.cat,.card,.tab,nav button,.q button,.fav,.snd,.row.tap";
+document.addEventListener("pointerdown",e=>{const el=e.target.closest(PRESS);if(!el||el.disabled)return;el.classList.add("pressed");
+ if(el.matches(".btn,.chip,.cat,.card,.tab,.q button")){const r=el.getBoundingClientRect(),z=Math.max(r.width,r.height)*1.6,s=document.createElement("span");
+  if(getComputedStyle(el).position==="static")el.style.position="relative";el.style.overflow="hidden";
+  s.className="rip";s.style.cssText=`width:${z}px;height:${z}px;left:${e.clientX-r.left-z/2}px;top:${e.clientY-r.top-z/2}px`;el.appendChild(s);setTimeout(()=>s.remove(),620)}},{passive:true});
+const unpress=()=>document.querySelectorAll(".pressed").forEach(x=>x.classList.remove("pressed"));
+["pointerup","pointercancel","touchend","scroll"].forEach(ev=>document.addEventListener(ev,unpress,{passive:true,capture:true}));
+document.addEventListener("click",e=>{const el=e.target.closest(PRESS);if(!el||el.disabled)return;
+ if(el.matches(".btn:not(.alt)"))return; /* asosiy tugmalar o'z ovoziga ega */ play("tap");hap()},true);
+function fly(from){const nb=document.getElementById("nav");if(!nb||!from||!from.width)return;const to=nb.children[2].getBoundingClientRect(),d=document.createElement("div");
+ d.className="fly";d.style.left=from.left+from.width/2-9+"px";d.style.top=from.top+from.height/2-9+"px";document.body.appendChild(d);
+ const a=d.animate([{transform:"translate(0,0) scale(1)",opacity:1},{transform:`translate(${to.left+to.width/2-from.left-from.width/2}px,${to.top+14-from.top-from.height/2}px) scale(.3)`,opacity:.5}],{duration:750,easing:"cubic-bezier(.45,-.3,.6,1)"});a.onfinish=()=>d.remove()}
+
 const tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand()}
 const CATS=["Erkaklar kiyimi","Ayollar kiyimi","Bolalar kiyimi","Oyoq kiyim","Elektronika","Telefon aksessuarlari","Maishiy texnika","Oziq-ovqat","Kosmetika","Uy-ro'zg'or","Sport","Boshqa"];
 const $=id=>document.getElementById(id);
@@ -63,11 +164,11 @@ async function api(path,body){
  let j={};try{j=await r.json()}catch{}
  if(!r.ok)throw new Error(j.error||("Xatolik "+r.status));return j}
 let D=null,tab="stats",flt="Hammasi",cur={};
-const TABS=[["stats","📊 Statistika"],["orders","🧾 Buyurtmalar"],["products","📦 Mahsulotlar"],["promos","🏷 Promo-kodlar"],["banners","🖼 Bannerlar"],["customers","👥 Mijozlar"]];
-async function load(){try{D=await api("/api/admin/data");render()}catch(e){$("main").innerHTML=`<div class="empty">⛔ ${esc(e.message)}<br><br>Botda /admin bosib qayta oching.</div>`}}
+const TABS=[["stats","chart","Statistika"],["orders","receipt","Buyurtmalar"],["products","box","Mahsulotlar"],["promos","tag","Promo-kodlar"],["banners","image","Bannerlar"],["customers","users","Mijozlar"]];
+async function load(){try{D=await api("/api/admin/data");render()}catch(e){$("main").innerHTML=`<div class="empty">${ic("alert",20)} ${esc(e.message)}<br><br>Botda /admin bosib qayta oching.</div>`}}
 function go(t){tab=t;render();window.scrollTo(0,0)}
 function render(){
- $("tabs").innerHTML=TABS.map(t=>`<div class="tab ${tab===t[0]?"on":""}" onclick="go('${t[0]}')">${t[1]}</div>`).join("");
+ $("tabs").innerHTML=TABS.map(t=>`<div class="tab ${tab===t[0]?"on":""}" onclick="go('${t[0]}')">${ic(t[1],16)} ${t[2]}</div>`).join("");
  $("main").innerHTML=({stats:vStats,orders:vOrders,products:vProducts,promos:vPromos,banners:vBanners,customers:vCustomers})[tab]();
 }
 function vStats(){const s=D.stats,mx=Math.max(1,...s.days.map(d=>d.sum));
@@ -81,15 +182,15 @@ function vStats(){const s=D.stats,mx=Math.max(1,...s.days.map(d=>d.sum));
 function vOrders(){const l=D.orders.filter(o=>flt==="Hammasi"||o.status===flt);
  return `<div class="tabs">${["Hammasi",...D.statuses].map(x=>`<div class="tab ${flt===x?"on":""}" onclick="flt='${x.replace(/'/g,"\\'")}';render()">${x}</div>`).join("")}</div>`+
  (l.length?l.map(o=>`<div class="row"><b>#${esc(o.id)}</b> · ${esc(o.date)} <span class="tag">${esc(o.pay)}</span><br>
- 👤 ${esc(o.name)} · <a href="tel:${esc(o.phone)}">${esc(o.phone)}</a>${o.uname?" · @"+esc(o.uname):""}<br>📍 ${esc(o.region)}, ${esc(o.address)}<br>
+ ${ic("user",14)} ${esc(o.name)} · <a href="tel:${esc(o.phone)}">${esc(o.phone)}</a>${o.uname?" · @"+esc(o.uname):""}<br>${ic("pin",14)} ${esc(o.region)}, ${esc(o.address)}<br>
  ${o.items.map(i=>`• ${esc(i.name)} ${esc(i.size)} ${esc(i.color)} ×${i.qty}`).join("<br>")}<br>
  ${o.promo?`Promo: ${esc(o.promo)} (−${m(o.discount)})<br>`:""}Yetkazish: ${o.delivery?m(o.delivery):"Bepul"}<br><b>Jami: ${m(o.total)}</b>
  <select class="f" onchange="setSt('${esc(o.id)}',this.value)" ${o.status==="Bekor qilindi"?"disabled":""}>${D.statuses.map(x=>`<option ${x===o.status?"selected":""}>${x}</option>`).join("")}</select></div>`).join(""):`<div class="empty">Buyurtma yo'q</div>`)}
 async function setSt(id,status){if(status==="Bekor qilindi"&&!confirm("Buyurtma bekor qilinsinmi? Mahsulotlar omborga qaytadi."))return load();
- try{await api("/api/admin/order-status",{id,status});await load()}catch(e){alert(e.message);load()}}
-function vProducts(){return `<button class="btn full" onclick="editP()">+ Mahsulot qo'shish</button><div style="height:10px"></div>`+
- D.products.map(p=>`<div class="row flex"><div class="th">${p.img?`<img src="${esc(p.img)}">`:esc(p.emoji)}</div><div class="grow"><b>${esc(p.name)}</b>${p.active?"":'<span class="tag">yashirin</span>'}<br><span class="mut">${CATS[p.cat]} · ${m(p.price)}${p.old?" (eski "+m(p.old)+")":""} · ombor: ${p.stock}</span></div>
- <button class="btn alt sm" onclick="editP(${p.id})">✏️</button><button class="btn red sm" onclick="del('products',${p.id})">🗑</button></div>`).join("")}
+ try{await api("/api/admin/order-status",{id,status});play("ok");hap("ok");toast("Holat o'zgardi");await load()}catch(e){alert(e.message);load()}}
+function vProducts(){return `<button class="btn full" onclick="editP()">${ic("plus",18)} Mahsulot qo'shish</button><div style="height:10px"></div>`+
+ D.products.map(p=>`<div class="row flex"><div class="th">${p.img?`<img src="${esc(p.img)}">`:ic(CI[p.cat]||"box",26)}</div><div class="grow"><b>${esc(p.name)}</b>${p.active?"":'<span class="tag">yashirin</span>'}<br><span class="mut">${CATS[p.cat]} · ${m(p.price)}${p.old?" (eski "+m(p.old)+")":""} · ombor: ${p.stock}</span></div>
+ <button class="btn alt sm" onclick="editP(${p.id})">${ic("edit",16)}</button><button class="btn red sm" onclick="del('products',${p.id})">${ic("trash",16)}</button></div>`).join("")}
 function editP(id){cur=id?{...D.products.find(p=>p.id===id)}:{active:true,rating:4.5,emoji:"📦",cat:0,sizes:[],colors:[]};
  $("box").innerHTML=`<h3>${id?"Mahsulotni tahrirlash":"Yangi mahsulot"}</h3>
  <input class="f" id="fn" placeholder="Nomi" value="${esc(cur.name)}">
@@ -97,43 +198,42 @@ function editP(id){cur=id?{...D.products.find(p=>p.id===id)}:{active:true,rating
  <input class="f" id="fp" type="number" placeholder="Narxi (so'm)" value="${cur.price??""}">
  <input class="f" id="fo" type="number" placeholder="Eski narx (chegirma uchun, ixtiyoriy)" value="${cur.old||""}">
  <input class="f" id="fs" type="number" placeholder="Ombordagi soni" value="${cur.stock??""}">
- <input class="f" id="fe" placeholder="Emoji (rasm bo'lmasa)" value="${esc(cur.emoji)}">
- <div class="flex"><div class="th" id="prev">${cur.img?`<img src="${esc(cur.img)}">`:esc(cur.emoji)}</div><input type="file" accept="image/*" onchange="pickImg(this)"></div>
+ <div class="flex"><div class="th" id="prev">${cur.img?`<img src="${esc(cur.img)}">`:ic(CI[cur.cat]||"box",26)}</div><input type="file" accept="image/*" onchange="pickImg(this)"></div>
  <input class="f" id="fz" placeholder="O'lchamlar: S,M,L" value="${esc((cur.sizes||[]).join(","))}">
  <input class="f" id="fl" placeholder="Ranglar: Oq,Qora" value="${esc((cur.colors||[]).join(","))}">
  <textarea class="f" id="fd" rows="3" placeholder="Tavsif">${esc(cur.desc)}</textarea>
  <label><input type="checkbox" id="fa" ${cur.active?"checked":""}> Sotuvda ko'rinsin</label>
- <button class="btn full" onclick="saveP()">💾 Saqlash</button><button class="btn alt full" onclick="closeS()">Bekor qilish</button>`;
- $("sheet").classList.add("show")}
+ <button class="btn full" onclick="saveP()">${ic("save",18)} Saqlash</button><button class="btn alt full" onclick="closeS()">Bekor qilish</button>`;
+ $("sheet").classList.add("show");play("pop")}
 function pickImg(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
  const s=Math.min(1,600/Math.max(im.width,im.height));const c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
  c.getContext("2d").drawImage(im,0,0,c.width,c.height);cur.img=c.toDataURL("image/jpeg",.72);$("prev").innerHTML=`<img src="${cur.img}">`};im.src=r.result};r.readAsDataURL(f)}
 const csv=v=>v.split(",").map(x=>x.trim()).filter(Boolean);
 async function saveP(){
- const item={id:cur.id,name:$("fn").value,cat:+$("fc").value,price:+$("fp").value,old:+$("fo").value||0,stock:+$("fs").value||0,emoji:$("fe").value||"📦",img:cur.img||"",sizes:csv($("fz").value),colors:csv($("fl").value),desc:$("fd").value,active:$("fa").checked,rating:cur.rating||4.5};
- if(!item.name.trim())return alert("Nomini kiriting");if(!(item.price>0))return alert("Narxni kiriting");
+ const item={id:cur.id,name:$("fn").value,cat:+$("fc").value,price:+$("fp").value,old:+$("fo").value||0,stock:+$("fs").value||0,emoji:cur.emoji||"x",img:cur.img||"",sizes:csv($("fz").value),colors:csv($("fl").value),desc:$("fd").value,active:$("fa").checked,rating:cur.rating||4.5};
+ if(!item.name.trim()){play("err");return alert("Nomini kiriting")};if(!(item.price>0)){play("err");return alert("Narxni kiriting")};
  await saveItem("products",item)}
-async function saveItem(type,item){try{await api("/api/admin/save",{type,item});closeS();await load()}catch(e){alert(e.message)}}
-async function del(type,id){if(!confirm("O'chirilsinmi?"))return;try{await api("/api/admin/delete",{type,id});await load()}catch(e){alert(e.message)}}
-function vPromos(){return `<button class="btn full" onclick="editPromo()">+ Promo-kod qo'shish</button><div style="height:10px"></div>`+
+async function saveItem(type,item){try{await api("/api/admin/save",{type,item});closeS();play("ok");hap("ok");toast("Saqlandi");await load()}catch(e){play("err");alert(e.message)}}
+async function del(type,id){if(!confirm("O'chirilsinmi?"))return;try{await api("/api/admin/delete",{type,id});play("del");toast("O'chirildi");await load()}catch(e){alert(e.message)}}
+function vPromos(){return `<button class="btn full" onclick="editPromo()">${ic("plus",18)} Promo-kod qo'shish</button><div style="height:10px"></div>`+
  D.promos.map(p=>`<div class="row flex"><div class="grow"><b>${esc(p.code)}</b> · −${p.percent}% ${p.active?"":'<span class="tag">o\'chiq</span>'}</div>
- <button class="btn alt sm" onclick="editPromo('${esc(p.code)}')">✏️</button><button class="btn red sm" onclick="del('promos','${esc(p.code)}')">🗑</button></div>`).join("")}
+ <button class="btn alt sm" onclick="editPromo('${esc(p.code)}')">${ic("edit",16)}</button><button class="btn red sm" onclick="del('promos','${esc(p.code)}')">${ic("trash",16)}</button></div>`).join("")}
 function editPromo(code){const p=code?D.promos.find(x=>x.code===code):{code:"",percent:10,active:true};
  $("box").innerHTML=`<h3>Promo-kod</h3><input class="f" id="pcode" placeholder="KOD (lotin harf/raqam)" value="${esc(p.code)}" ${code?"readonly":""}>
  <input class="f" id="ppc" type="number" placeholder="Chegirma foizi (1-90)" value="${p.percent}">
  <label><input type="checkbox" id="pa" ${p.active?"checked":""}> Faol</label>
- <button class="btn full" onclick="saveItem('promos',{code:$('pcode').value,percent:+$('ppc').value,active:$('pa').checked})">💾 Saqlash</button><button class="btn alt full" onclick="closeS()">Bekor qilish</button>`;
- $("sheet").classList.add("show")}
-function vBanners(){return `<button class="btn full" onclick="editB()">+ Banner qo'shish</button><div style="height:10px"></div>`+
+ <button class="btn full" onclick="saveItem('promos',{code:$('pcode').value,percent:+$('ppc').value,active:$('pa').checked})">${ic("save",18)} Saqlash</button><button class="btn alt full" onclick="closeS()">Bekor qilish</button>`;
+ $("sheet").classList.add("show");play("pop")}
+function vBanners(){return `<button class="btn full" onclick="editB()">${ic("plus",18)} Banner qo'shish</button><div style="height:10px"></div>`+
  D.banners.map(b=>`<div class="row flex"><div class="grow"><b>${esc(b.title)}</b>${b.active?"":'<span class="tag">yashirin</span>'}<br><span class="mut">${esc(b.text)}</span></div>
- <button class="btn alt sm" onclick="editB(${b.id})">✏️</button><button class="btn red sm" onclick="del('banners',${b.id})">🗑</button></div>`).join("")}
+ <button class="btn alt sm" onclick="editB(${b.id})">${ic("edit",16)}</button><button class="btn red sm" onclick="del('banners',${b.id})">${ic("trash",16)}</button></div>`).join("")}
 function editB(id){const b=id?D.banners.find(x=>x.id===id):{title:"",text:"",active:true};
  $("box").innerHTML=`<h3>Banner</h3><input class="f" id="bt" placeholder="Sarlavha" value="${esc(b.title)}"><input class="f" id="bx" placeholder="Matn" value="${esc(b.text)}">
  <label><input type="checkbox" id="ba" ${b.active?"checked":""}> Ko'rinsin</label>
- <button class="btn full" onclick="saveItem('banners',{id:${id||0},title:$('bt').value,text:$('bx').value,active:$('ba').checked})">💾 Saqlash</button><button class="btn alt full" onclick="closeS()">Bekor qilish</button>`;
- $("sheet").classList.add("show")}
+ <button class="btn full" onclick="saveItem('banners',{id:${id||0},title:$('bt').value,text:$('bx').value,active:$('ba').checked})">${ic("save",18)} Saqlash</button><button class="btn alt full" onclick="closeS()">Bekor qilish</button>`;
+ $("sheet").classList.add("show");play("pop")}
 function vCustomers(){return D.customers.length?D.customers.map(c=>`<div class="row"><b>${esc(c.name)}</b>${c.username?" · @"+esc(c.username):""}<br><a href="tel:${esc(c.phone)}">${esc(c.phone)}</a><br><span class="mut">Buyurtmalar: ${c.orders} · Xarid: ${m(c.spent)} · Birinchi: ${esc(c.first)}</span></div>`).join(""):`<div class="empty">Mijozlar hali yo'q</div>`}
 function closeS(){$("sheet").classList.remove("show")}
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")closeS()});
-load();
+sndIcon();load();
 </script></body></html>
